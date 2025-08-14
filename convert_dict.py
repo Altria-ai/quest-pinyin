@@ -9,7 +9,8 @@ import json
 DICT_FILES = [
     {'path': '8105.dict.yaml', 'type': 'char'},       # 常用字库最优先
     {'path': '41448.dict.yaml', 'type': 'char_rare'}, # 罕用字库其次
-    {'path': 'base.dict.yaml', 'type': 'word'},      # 综合词库最后处理
+    {'path': 'base.dict.yaml', 'type': 'word'},      # 综合词库
+    {'path': 'ext.dict.yaml', 'type': 'word'},         # 扩展词库最后处理
 ]
 OUTPUT_DIR = 'public/dict'
 
