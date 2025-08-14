@@ -1,0 +1,170 @@
+body {
+    background-color: #333;
+    color: #fff;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.ime-container {
+    width: 800px;
+    padding: 20px;
+    background-color: #444;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.output-area {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.output-controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+
+.control-btn {
+    padding: 5px 12px;
+    font-size: 16px;
+    background-color: #5a5a5a;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.control-btn:hover {
+    background-color: #777;
+}
+
+.control-btn:disabled {
+    background-color: #007acc;
+    cursor: default;
+}
+
+#output-text {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 24px;
+    padding: 10px;
+    padding-top: 45px; /* 为按钮留出空间 */
+    border-radius: 8px;
+    border: 1px solid #666;
+    background-color: #555;
+    color: #fff;
+    resize: vertical;
+}
+
+.status-bar {
+    height: 40px;
+    font-size: 28px;
+    padding: 0 10px;
+    color: #a0e9ff;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* 修改 #candidates-container 样式以固定高度 */
+#candidates-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    
+    /* --- 【核心修改】--- */
+    height: 140px;          /* 设置一个固定的高度，例如3行候选词的高度 */
+    overflow-y: auto;       /* 如果内容超出，则显示垂直滚动条 */
+    align-content: flex-start; /* 让内容从顶部开始排列 */
+
+    /* --- 【旧样式移除】--- */
+    /* min-height: 50px; */ /* 不再需要最小高度 */
+
+    /* --- 其他样式保留 --- */
+    padding: 10px;
+    background-color: #3a3a3a;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+/* (可选) 美化滚动条，使其在暗色主题下更和谐 */
+#candidates-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+#candidates-container::-webkit-scrollbar-track {
+    background: #3a3a3a;
+}
+
+#candidates-container::-webkit-scrollbar-thumb {
+    background-color: #666;
+    border-radius: 4px;
+    border: 2px solid #3a3a3a;
+}
+
+.candidate-item {
+    font-size: 26px;
+    padding: 5px 15px;
+    background-color: #5a5a5a;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.candidate-item:hover {
+    background-color: #007acc;
+}
+
+#keyboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.keyboard-row:nth-child(2) {
+    margin-left: 30px;
+}
+.keyboard-row:nth-child(3) {
+    margin-left: 60px;
+}
+
+.key {
+    height: 60px;
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #666;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s, transform 0.1s;
+    flex-grow: 1; /* 让按键自动填充 */
+    flex-basis: 0; /* 基础宽度为0，完全由grow决定 */
+}
+
+.key:active {
+    background-color: #888;
+    transform: scale(0.95);
+}
+
+.special-key {
+    background-color: #7a7a7a;
+}
+.key-backspace { flex-grow: 1.5; }
+.key-space { flex-grow: 5; }
+.key-enter { flex-grow: 1.5; }

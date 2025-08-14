@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quest Web Pinyin IME</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ime-container">
+        <!-- 最终输出的文本区域 -->
+        <div class="output-area">
+            <div class="output-controls">
+                <button id="backspace-btn" class="control-btn">退格</button>
+                <button id="clear-btn" class="control-btn">清除</button>
+                <button id="copy-btn" class="control-btn">复制</button>
+            </div>
+            <textarea id="output-text" rows="5" placeholder="中文将在这里显示..."></textarea>
+        </div>
+
+        <!-- 状态显示区域 -->
+        <div class="status-bar">
+            <span id="pinyin-display"></span>
+        </div>
+
+        <!-- 候选词区域 -->
+        <div id="candidates-container"></div>
+
+        <!-- 虚拟键盘 -->
+        <div id="keyboard-container"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
