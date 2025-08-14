@@ -11,11 +11,16 @@
         <!-- 最终输出的文本区域 -->
         <div class="output-area">
             <div class="output-controls">
+                <!-- 【修改 2】增加主题切换按钮 -->
+                <button id="theme-toggle-btn" class="control-btn" title="切换主题">
+                    <!-- 图标会由JS动态插入 -->
+                </button>
                 <button id="backspace-btn" class="control-btn">退格</button>
                 <button id="clear-btn" class="control-btn">清除</button>
                 <button id="copy-btn" class="control-btn">复制</button>
             </div>
-            <textarea id="output-text" rows="5" placeholder="中文将在这里显示..."></textarea>
+            <!-- 【修改 1】增加 readonly 属性，移除光标 -->
+            <textarea id="output-text" rows="5" placeholder="中文将在这里显示..." readonly></textarea>
         </div>
 
         <!-- 状态显示区域 -->

@@ -1,20 +1,62 @@
+/* style.css 完整版 */
+:root {
+    --bg-color: #333;
+    --container-bg: #444;
+    --output-bg: #555;
+    --output-border: #666;
+    --text-color: #fff;
+    --pinyin-color: #a0e9ff;
+    --candidates-bg: #3a3a3a;
+    --candidate-item-bg: #5a5a5a;
+    --candidate-item-hover-bg: #007acc;
+    --key-bg: #666;
+    --key-special-bg: #7a7a7a;
+    --key-active-bg: #888;
+    --control-btn-bg: #5a5a5a;
+    --control-btn-hover-bg: #777;
+    --scrollbar-thumb: #666;
+    --scrollbar-track: #3a3a3a;
+}
+
+body.light-mode {
+    --bg-color: #f0f0f0;
+    --container-bg: #ffffff;
+    --output-bg: #f9f9f9;
+    --output-border: #ccc;
+    --text-color: #333;
+    --pinyin-color: #005a8e;
+    --candidates-bg: #e9e9e9;
+    --candidate-item-bg: #dcdcdc;
+    --candidate-item-hover-bg: #007acc;
+    --key-bg: #d1d1d1;
+    --key-special-bg: #b0b0b0;
+    --key-active-bg: #a0a0a0;
+    --control-btn-bg: #e0e0e0;
+    --control-btn-hover-bg: #c7c7c7;
+    --scrollbar-thumb: #b0b0b0;
+    --scrollbar-track: #e9e9e9;
+}
+
+
 body {
-    background-color: #333;
-    color: #fff;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     font-family: sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .ime-container {
     width: 800px;
     padding: 20px;
-    background-color: #444;
+    background-color: var(--container-bg);
     border-radius: 15px;
     box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    transition: background-color 0.3s;
 }
 
 .output-area {
@@ -34,20 +76,32 @@ body {
 .control-btn {
     padding: 5px 12px;
     font-size: 16px;
-    background-color: #5a5a5a;
-    color: #fff;
+    background-color: var(--control-btn-bg);
+    color: var(--text-color);
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 【修改 1】主题切换按钮的特定样式，适配 Emoji */
+#theme-toggle-btn {
+    width: 42px;
+    height: 32px;
+    padding: 0;
+    font-size: 20px; /* 控制 Emoji 的大小 */
 }
 
 .control-btn:hover {
-    background-color: #777;
+    background-color: var(--control-btn-hover-bg);
 }
 
 .control-btn:disabled {
     background-color: #007acc;
+    color: #fff;
     cursor: default;
 }
 
@@ -56,70 +110,60 @@ body {
     box-sizing: border-box;
     font-size: 24px;
     padding: 10px;
-    padding-top: 45px; /* 为按钮留出空间 */
+    padding-top: 45px;
     border-radius: 8px;
-    border: 1px solid #666;
-    background-color: #555;
-    color: #fff;
+    border: 1px solid var(--output-border);
+    background-color: var(--output-bg);
+    color: var(--text-color);
     resize: vertical;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
 .status-bar {
     height: 40px;
     font-size: 28px;
     padding: 0 10px;
-    color: #a0e9ff;
+    color: var(--pinyin-color);
     white-space: nowrap;
     overflow: hidden;
+    transition: color 0.3s;
 }
 
-/* 修改 #candidates-container 样式以固定高度 */
 #candidates-container {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    
-    /* --- 【核心修改】--- */
-    height: 140px;          /* 设置一个固定的高度，例如3行候选词的高度 */
-    overflow-y: auto;       /* 如果内容超出，则显示垂直滚动条 */
-    align-content: flex-start; /* 让内容从顶部开始排列 */
-
-    /* --- 【旧样式移除】--- */
-    /* min-height: 50px; */ /* 不再需要最小高度 */
-
-    /* --- 其他样式保留 --- */
+    height: 140px;
+    overflow-y: auto;
+    align-content: flex-start;
     padding: 10px;
-    background-color: #3a3a3a;
+    background-color: var(--candidates-bg);
     border-radius: 8px;
     margin-bottom: 15px;
+    transition: background-color 0.3s;
 }
 
-/* (可选) 美化滚动条，使其在暗色主题下更和谐 */
-#candidates-container::-webkit-scrollbar {
-    width: 8px;
-}
-
-#candidates-container::-webkit-scrollbar-track {
-    background: #3a3a3a;
-}
-
+#candidates-container::-webkit-scrollbar { width: 8px; }
+#candidates-container::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 #candidates-container::-webkit-scrollbar-thumb {
-    background-color: #666;
+    background-color: var(--scrollbar-thumb);
     border-radius: 4px;
-    border: 2px solid #3a3a3a;
+    border: 2px solid var(--scrollbar-track);
 }
 
 .candidate-item {
     font-size: 26px;
     padding: 5px 15px;
-    background-color: #5a5a5a;
+    background-color: var(--candidate-item-bg);
+    color: var(--text-color);
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, color 0.3s;
 }
 
 .candidate-item:hover {
-    background-color: #007acc;
+    background-color: var(--candidate-item-hover-bg);
+    color: #fff;
 }
 
 #keyboard-container {
@@ -134,12 +178,8 @@ body {
     gap: 8px;
 }
 
-.keyboard-row:nth-child(2) {
-    margin-left: 30px;
-}
-.keyboard-row:nth-child(3) {
-    margin-left: 60px;
-}
+.keyboard-row:nth-child(2) { margin-left: 20px; }
+.keyboard-row:nth-child(3) { margin-left: 55px; }
 
 .key {
     height: 60px;
@@ -148,22 +188,29 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #666;
+    background-color: var(--key-bg);
+    color: var(--text-color);
     border-radius: 8px;
     cursor: pointer;
     user-select: none;
-    transition: background-color 0.2s, transform 0.1s;
-    flex-grow: 1; /* 让按键自动填充 */
-    flex-basis: 0; /* 基础宽度为0，完全由grow决定 */
+    transition: background-color 0.2s, transform 0.1s, color 0.3s;
+    width: 68px;
+    flex-shrink: 0;
+}
+
+.keyboard-row:last-child .key {
+    width: auto;
+    flex-grow: 1;
+    flex-basis: 0;
 }
 
 .key:active {
-    background-color: #888;
+    background-color: var(--key-active-bg);
     transform: scale(0.95);
 }
 
 .special-key {
-    background-color: #7a7a7a;
+    background-color: var(--key-special-bg);
 }
 .key-backspace { flex-grow: 1.5; }
 .key-space { flex-grow: 5; }

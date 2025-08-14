@@ -7,11 +7,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearBtn = document.getElementById('clear-btn');
     const copyBtn = document.getElementById('copy-btn');
     const backspaceBtn = document.getElementById('backspace-btn');
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const body = document.body;
 
     // --- 状态变量 ---
     let currentPinyin = '';
-    let loadedDict = {}; // 缓存已加载的词典
+    let loadedDict = {};
 
+    // 【修改 1】使用 Emoji 替换 SVG
+    const sunIcon = '☀️';
+    const moonIcon = '🌙';
+
+    function applyTheme(theme) {
+        if (theme === 'light') {
+            body.classList.add('light-mode');
+            themeToggleBtn.textContent = moonIcon; // 使用 textContent 设置 Emoji
+        } else {
+            body.classList.remove('light-mode');
+            themeToggleBtn.textContent = sunIcon; // 使用 textContent 设置 Emoji
+        }
+    }
+    
     // --- 键盘布局 ---
     const keyLayout = [
         ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
@@ -20,12 +36,22 @@ document.addEventListener('DOMContentLoaded', () => {
         ['Backspace', 'Space', 'Enter']
     ];
 
-    // --- 功能函数 ---
     /**
-     * 【核心新增】检查一个拼音字符串是否在词典中存在
-     * @param {string} pinyin - 要检查的拼音.
-     * @returns {Promise<boolean>}
+     * 【修改 2】新增：在后台预加载所有字典文件
      */
+    async function preloadAllDictionaries() {
+        console.log("开始预加载所有字典...");
+        const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+        const promises = alphabet.map(char => loadDictionary(char));
+        try {
+            await Promise.all(promises);
+            console.log("所有字典预加载完成！");
+        } catch (error) {
+            console.error("预加载字典时发生错误:", error);
+        }
+    }
+
+    // --- 其他核心功能函数 (无变化，保持原样) ---
     async function isPinyinValid(pinyin) {
         if (!pinyin) return false;
         const firstChar = pinyin[0];
@@ -33,20 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const pinyinData = loadedDict[firstChar];
         return pinyinData && pinyinData[pinyin];
     }
-
-    /**
-     * 【核心新增】使用最大正向匹配法分割拼音字符串
-     * @param {string} pinyinStr - 完整的拼音字符串.
-     * @returns {Promise<string[]>} - 分割后的拼音数组.
-     */
     async function segmentPinyin(pinyinStr) {
         const segments = [];
         let currentIndex = 0;
-        const maxSyllableLength = 6; // 拼音最长音节长度 (如 zhuang)
-
+        const maxSyllableLength = 6;
         while (currentIndex < pinyinStr.length) {
             let found = false;
-            // 从长到短尝试匹配
             for (let len = maxSyllableLength; len >= 1; len--) {
                 const sub = pinyinStr.substr(currentIndex, len);
                 if (await isPinyinValid(sub)) {
@@ -56,19 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 }
             }
-            // 如果一个字符都匹配不上，说明后续输入有误，停止分割
-            if (!found) {
-                break;
-            }
+            if (!found) break;
         }
         return segments;
     }
-
-    /**
-     * 【核心新增】获取单个拼音对应的首选汉字
-     * @param {string} pinyin - 单个拼音.
-     * @returns {Promise<string|null>}
-     */
     async function getTopWord(pinyin) {
         if (!pinyin) return null;
         const firstChar = pinyin[0];
@@ -79,29 +88,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return null;
     }
-
-    /**
-     * 【重写】更新候选词区域的逻辑，集成句子生成
-     */
     async function updateCandidates() {
         candidatesContainer.innerHTML = '';
         if (!currentPinyin) return;
-
         let finalCandidates = new Set();
-
-        // --- 1. 句子生成 ---
         const segments = await segmentPinyin(currentPinyin);
         if (segments.length > 1) {
-            // 使用 Promise.all 并行获取所有音节的首选汉字
             const topWords = await Promise.all(segments.map(p => getTopWord(p)));
-            // 过滤掉可能存在的 null (获取失败的音节)
             const sentence = topWords.filter(word => word).join('');
             if (sentence) {
                 finalCandidates.add(sentence);
             }
         }
-        
-        // --- 2. 传统前缀匹配 (用于词组和单字) ---
         const firstChar = currentPinyin[0];
         await loadDictionary(firstChar);
         const pinyinData = loadedDict[firstChar];
@@ -112,18 +110,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     prefixWords.push(...pinyinData[pinyin]);
                 }
             }
-            // 对前缀匹配结果进行智能排序并截取
-            const sortedPrefixWords = [...new Set(prefixWords)] // 去重
-                .sort((a, b) => a.length - b.length) // 按长度排序
-                .slice(0, 20); // 取前20个
-            
+            const sortedPrefixWords = [...new Set(prefixWords)]
+                .sort((a, b) => a.length - b.length)
+                .slice(0, 20);
             sortedPrefixWords.forEach(word => finalCandidates.add(word));
         }
-
-        // --- 3. 渲染最终候选列表 ---
-        if (finalCandidates.size === 0) {
-            // 如果没有任何候选，可以显示原始英文字符串作为候选
-            candidatesContainer.innerHTML = `<div class="candidate-item fallback">${currentPinyin}</div>`;
+        if (finalCandidates.size === 0 && currentPinyin) {
+            const fallbackEl = document.createElement('div');
+            fallbackEl.classList.add('candidate-item');
+            fallbackEl.textContent = currentPinyin;
+            fallbackEl.addEventListener('click', () => selectCandidate(currentPinyin));
+            candidatesContainer.appendChild(fallbackEl);
         } else {
             finalCandidates.forEach(word => {
                 const candidateElement = document.createElement('div');
@@ -134,19 +131,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
-
     function createKeyboard() {
         keyboardContainer.innerHTML = '';
         keyLayout.forEach(row => {
             const rowElement = document.createElement('div');
             rowElement.classList.add('keyboard-row');
-            
             row.forEach(key => {
                 const keyElement = document.createElement('div');
                 keyElement.classList.add('key');
                 keyElement.textContent = key;
                 keyElement.dataset.key = key;
-
                 if (key.length > 1) {
                     keyElement.classList.add('special-key');
                     keyElement.classList.add(`key-${key.toLowerCase()}`);
@@ -156,73 +150,66 @@ document.addEventListener('DOMContentLoaded', () => {
             keyboardContainer.appendChild(rowElement);
         });
     }
-
+    // `loadDictionary` 函数现在被预加载和实时输入共同调用
     async function loadDictionary(firstChar) {
-        if (!firstChar || loadedDict[firstChar]) {
+        if (!firstChar || !/^[a-z]$/.test(firstChar) || loadedDict[firstChar]) {
             return;
         }
         try {
+            // 标记为正在加载，防止重复请求
+            loadedDict[firstChar] = "loading"; 
             const response = await fetch(`dict/${firstChar}.json`);
-            if (!response.ok) throw new Error('Dictionary not found');
+            if (!response.ok) throw new Error(`Dictionary for '${firstChar}' not found`);
             loadedDict[firstChar] = await response.json();
         } catch (error) {
             console.error(error);
-            loadedDict[firstChar] = null; // 标记为加载失败，避免重试
+            loadedDict[firstChar] = null; // 标记为加载失败
         }
     }
-
-  
     function selectCandidate(word) {
         outputText.value += word;
         currentPinyin = '';
         pinyinDisplay.textContent = '';
         candidatesContainer.innerHTML = '';
-        outputText.focus();
     }
-
     function handleKeyPress(key) {
         switch (key) {
             case 'Backspace':
                 currentPinyin = currentPinyin.slice(0, -1);
                 break;
             case 'Enter':
-                selectCandidate(currentPinyin); 
+                if (currentPinyin) {
+                    selectCandidate(currentPinyin);
+                }
                 return;
             case 'Space':
                 const firstCandidate = candidatesContainer.querySelector('.candidate-item');
                 if (firstCandidate) {
                     firstCandidate.click();
                 } else {
-                    selectCandidate(' '); // 如果没有候选词，输入空格
+                    selectCandidate(' ');
                 }
                 return;
             default:
-                if (currentPinyin.length < 15) { // 限制拼音最大长度
+                if (/^[a-z]$/.test(key) && currentPinyin.length < 20) {
                     currentPinyin += key;
                 }
                 break;
         }
-
         pinyinDisplay.textContent = currentPinyin;
         updateCandidates();
     }
 
-    // --- 事件监听 ---
+    // --- 事件监听 (无变化) ---
     keyboardContainer.addEventListener('click', (event) => {
-        if (event.target.classList.contains('key')) {
-            const key = event.target.dataset.key;
-            handleKeyPress(key);
+        const keyElement = event.target.closest('.key');
+        if (keyElement) {
+            handleKeyPress(keyElement.dataset.key);
         }
     });
-
-    clearBtn.addEventListener('click', () => {
-        outputText.value = '';
-        outputText.focus();
-    });
-
+    clearBtn.addEventListener('click', () => { outputText.value = ''; });
     copyBtn.addEventListener('click', () => {
         if (!outputText.value) return;
-
         navigator.clipboard.writeText(outputText.value).then(() => {
             const originalText = copyBtn.textContent;
             copyBtn.textContent = '已复制!';
@@ -233,17 +220,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 2000);
         }).catch(err => {
             console.error('复制失败: ', err);
-            alert('复制失败，您的浏览器可能不支持或权限不足。');
+            alert('复制失败');
         });
     });
-
-    backspaceBtn.addEventListener('click', () => {
-        // 使用 slice(0, -1) 来移除字符串的最后一个字符
-        outputText.value = outputText.value.slice(0, -1);
-        outputText.focus();
+    backspaceBtn.addEventListener('click', () => { outputText.value = outputText.value.slice(0, -1); });
+    themeToggleBtn.addEventListener('click', () => {
+        const currentTheme = body.classList.contains('light-mode') ? 'light' : 'dark';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        applyTheme(newTheme);
+        localStorage.setItem('ime-theme', newTheme);
     });
 
     // --- 初始化 ---
     createKeyboard();
-    outputText.focus();
+    const savedTheme = localStorage.getItem('ime-theme') || 'dark';
+    applyTheme(savedTheme);
+
+    // 【修改 2】在所有初始化完成后，开始在后台预加载字典
+    preloadAllDictionaries();
 });
