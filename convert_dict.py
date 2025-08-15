@@ -1,4 +1,4 @@
-# convert_dict.py (最终修正版)
+# convert_dict.py (修改版，生成单个合并文件)
 import yaml
 from collections import defaultdict
 import os
@@ -13,7 +13,7 @@ DICT_FILES = [
 ]
 OUTPUT_DIR = 'public/dict'
 
-# --- 核心逻辑 ---
+# --- 核心逻辑 (这部分完全不变) ---
 
 def process_file(file_path, pinyin_map, processed_entries):
     """
@@ -58,7 +58,6 @@ def process_file(file_path, pinyin_map, processed_entries):
             continue
 
         entry_key = word + pinyin
-        # 如果这个“词+拼音”组合已经被处理过，则跳过，保证高优先级文件的数据被保留
         if entry_key in processed_entries:
             continue
 
@@ -88,9 +87,7 @@ def convert_all():
         if not pinyin:
             continue
             
-        # 智能排序：1. 按长度升序排（单字优先）；2. 长度相同时按权重降序排。
         sorted_candidates = sorted(candidates, key=lambda item: (len(item[0]), -item[1]))
-        
         final_word_list = [item[0] for item in sorted_candidates]
         
         first_char = pinyin[0]
@@ -101,12 +98,19 @@ def convert_all():
         os.makedirs(OUTPUT_DIR)
         print(f"已创建输出目录: {OUTPUT_DIR}")
         
-    for first_char, data in split_dicts.items():
-        output_path = os.path.join(OUTPUT_DIR, f'{first_char}.json')
-        with open(output_path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False)
+    # --- 【核心修改点】 ---
+    # 之前是循环写入多个文件，现在我们只写入一个合并后的大文件。
+    
+    # 1. 定义合并后文件的完整路径
+    output_path = os.path.join(OUTPUT_DIR, 'dict.json')
+    
+    # 2. 将整个 split_dicts 对象一次性写入
+    with open(output_path, 'w', encoding='utf-8') as f:
+        # 使用 split_dicts 这个包含了所有字母数据的完整字典
+        json.dump(split_dicts, f, ensure_ascii=False)
 
-    print(f"\n转换成功！所有优化后的 JSON 词库文件已保存到 '{OUTPUT_DIR}' 目录。")
+    print(f"\n转换成功！合并后的主字典文件已保存到 '{output_path}'。")
+
 
 if __name__ == '__main__':
     convert_all()
