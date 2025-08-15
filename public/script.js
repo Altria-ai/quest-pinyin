@@ -64,13 +64,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const totalLength = +response.headers.get('Content-Length');
+            
+            // 【核心修改点】
+            // 如果无法获取文件总大小（例如因为服务器启用了动态压缩），
+            // 则提供一个回退提示，并直接加载，不再显示百分比进度。
             if (!totalLength) {
-                console.warn("无法获取字典文件总大小，无法显示进度。");
-                loadedDict = await response.json();
+                //console.warn("无法获取字典文件总大小（可能由于动态压缩），无法显示进度。");
+                loadingStatus.textContent = "正在加载字典 (请稍候)...";
+                
+                loadedDict = await response.json(); // 直接等待JSON解析完成
+                
+                console.log("主字典加载完成！");
                 loadingStatus.textContent = "字典加载完成!";
-                return;
+                return; // 提前结束函数，不执行下面的流式读取逻辑
             }
 
+            // --- 只有在获取到 Content-Length 时，才会执行下面的流式读取逻辑 ---
             const reader = response.body.getReader();
             let receivedLength = 0;
             const chunks = [];
