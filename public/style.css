@@ -120,6 +120,8 @@ body {
 }
 
 .status-bar {
+    display: flex; /* 【新增】使用flex布局，让加载提示和拼音并排 */
+    align-items: center;
     height: 40px;
     font-size: 28px;
     padding: 0 10px;
@@ -127,6 +129,13 @@ body {
     white-space: nowrap;
     overflow: hidden;
     transition: color 0.3s;
+}
+
+/* 【新增】加载状态的样式 */
+#loading-status {
+    font-size: 20px;
+    margin-right: 15px; /* 与拼音显示保持距离 */
+    opacity: 0.8;
 }
 
 #candidates-container {
